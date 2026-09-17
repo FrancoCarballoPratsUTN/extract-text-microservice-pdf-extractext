@@ -110,7 +110,7 @@ EXTRACT_NUM_THREADS=                 # opcional; si se omite, pool rayon = avail
 
 ### Fase 0 — Configuración e Infraestructura
 - [x] **T1** · Scaffold Cargo + toolchain + perfil release + flags AVX
-- [ ] **T2** · Config de entorno + logging estructurado
+- [x] **T2** · Config de entorno + logging estructurado
 - [ ] **T3** · Esqueleto de 3 capas + `/health` + body limit 50MB + problem+json base (spike vertical)
 
 ### ✅ Checkpoint A (T1-T3)

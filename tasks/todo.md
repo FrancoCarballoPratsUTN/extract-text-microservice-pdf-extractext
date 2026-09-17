@@ -36,13 +36,13 @@
 **Description:** Módulo `config.rs` que lee configuración por env vars (`EXTRACT_BIND_ADDR`, `EXTRACT_BODY_LIMIT_BYTES`, `EXTRACT_NUM_THREADS`) con defaults sensatos, y se inicializa `tracing_subscriber` para logs estructurados en consola. El tamaño del pool rayon se auto-detecta del dispositivo (sin valor fijo) y `EXTRACT_NUM_THREADS` sólo lo sobreescribe de forma opcional. Se documentan las vars en `.env.example`.
 
 **Acceptance criteria:**
-- [ ] `Config::from_env()` carga addr/puerto, body limit (default 50MB) y num_threads (default: `std::thread::available_parallelism()` del dispositivo, override opcional con `EXTRACT_NUM_THREADS`)
-- [ ] `main.rs` inicializa tracing y arranca con la config
-- [ ] `.env.example` documenta todas las variables
+- [x] `Config::from_env()` carga addr/puerto, body limit (default 50MB) y num_threads (default: `std::thread::available_parallelism()` del dispositivo, override opcional con `EXTRACT_NUM_THREADS`)
+- [x] `main.rs` inicializa tracing y arranca con la config
+- [x] `.env.example` documenta todas las variables
 
 **Verification:**
-- [ ] Tests pass: test unitario de parsing de config con vars custom
-- [ ] Manual check: arrancar el binario con env vars custom y verlas reflejadas en el log
+- [x] Tests pass: test unitario de parsing de config con vars custom → 8/8 (RED→GREEN)
+- [x] Manual check: arrancar el binario con env vars custom y verlas reflejadas en el log → `bind 127.0.0.1:9090, 4096, 4 threads`; defaults `0.0.0.0:8080, 52428800, 6 threads`; inválido → exit 1
 
 **Dependencies:** T1
 
