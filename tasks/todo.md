@@ -96,13 +96,13 @@
 **Description:** Tipos de la capa de dominio: `PdfBytes` (bytes decodificados), `PageText`, `ExtractedDocument { page_count, pages, text }` y enum `DomainError` con variantes tipadas (base64 inválido, firma PDF inválida, parseo lopdf, extracción). Sin clones: los DTOs consumen por valor.
 
 **Acceptance criteria:**
-- [ ] `DomainError` modela al menos: Base64Decode, InvalidPdfSignature, PdfParse, Extraction
-- [ ] `ExtractedDocument` no contiene `String` duplicadas ni referencias prestadas innecesarias
-- [ ] `#[derive(Debug, PartialEq)]` en todos los tipos para tests
+- [x] `DomainError` modela al menos: Base64Decode, InvalidPdfSignature, PdfParse, Extraction
+- [x] `ExtractedDocument` no contiene `String` duplicadas ni referencias prestadas innecesarias → `text()` derivado de `pages` con pre-sizing, sin campo duplicado
+- [x] `#[derive(Debug, PartialEq)]` en todos los tipos para tests
 
 **Verification:**
-- [ ] Tests pass: `cargo test domain::model` (construcción/igualdad de tipos)
-- [ ] Manual check: revisión de módulo por clippy sin warnings
+- [x] Tests pass: `cargo test domain::model` (construcción/igualdad de tipos) → 5/5 (RED→GREEN)
+- [x] Manual check: revisión de módulo por clippy sin warnings → `clippy -D warnings` limpio
 
 **Dependencies:** T1
 
