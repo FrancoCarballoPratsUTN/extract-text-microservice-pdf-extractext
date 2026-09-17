@@ -20,3 +20,6 @@ lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
+
+[dev-dependencies]
+tower = { version = "0.5.3", features = ["util"] }

@@ -60,13 +60,13 @@
 **Description:** Crea la estructura de módulos `api/`, `app/`, `domain/` (esqueletos). Implementa el spike vertical mínimo: router axum con `GET /health`, capa `DefaultBodyLimit::max(50MB)`, y una versión base de `ProblemDetails` (RFC 9457) con `Content-Type: application/problem+json` para el caso 413 (body excedido). Community del contrato HTTP temprano.
 
 **Acceptance criteria:**
-- [ ] `GET /health` responde `200 OK` con JSON mínimo
-- [ ] POST con body >50MB responde `413` con `Content-Type: application/problem+json` y cuerpo RFC 9457
-- [ ] La estructura `src/api/`, `src/app/`, `src/domain/` existe y compila
+- [x] `GET /health` responde `200 OK` con JSON mínimo
+- [x] POST con body >50MB responde `413` con `Content-Type: application/problem+json` y cuerpo RFC 9457
+- [x] La estructura `src/api/`, `src/app/`, `src/domain/` existe y compila
 
 **Verification:**
-- [ ] Tests pass: `cargo test` (test de integración del health y del 413)
-- [ ] Manual check: `curl -I -X POST localhost:8080/extract -d @grande.json` → `413 application/problem+json`
+- [x] Tests pass: `cargo test` (test de integración del health y del 413) → 2/2 (RED→GREEN)
+- [x] Manual check: `curl -I -X POST localhost:8080/extract -d @grande.json` → `413 application/problem+json` → verificado con curl en puerto efímero
 
 **Dependencies:** T1, T2
 
@@ -82,9 +82,9 @@
 ---
 
 ## ✅ Checkpoint A (T1-T3)
-- [ ] `cargo build --release` compila sin warnings
-- [ ] Server arranca; `GET /health` → 200
-- [ ] POST body >50MB → 413 `application/problem+json`
+- [x] `cargo build --release` compila sin warnings
+- [x] Server arranca; `GET /health` → 200
+- [x] POST body >50MB → 413 `application/problem+json`
 - [ ] Revisar contrato HTTP con el humano antes de continuar
 
 ---

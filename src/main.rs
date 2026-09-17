@@ -1,14 +1,12 @@
-mod config;
+use std::{env, net::SocketAddr, process::ExitCode};
 
-use std::env;
-use std::process::ExitCode;
-
-use config::Config;
+use extract::{api::router::build_router, config::Config};
 use tracing_subscriber::EnvFilter;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn main() -> ExitCode {
+#[tokio::main]
+async fn main() -> ExitCode {
     if env::args().any(|arg| arg == "--version") {
         println!("extract {VERSION}");
         return ExitCode::SUCCESS;
@@ -16,17 +14,36 @@ fn main() -> ExitCode {
 
     init_tracing();
 
-    match Config::from_env() {
-        Ok(config) => {
-            tracing::info!(?config, "configuration loaded");
-            tracing::info!(
-                threads = config.thread_count,
-                "scaffold up: HTTP server lands in T3"
-            );
-            ExitCode::SUCCESS
-        }
+    let config = match Config::from_env() {
+        Ok(config) => config,
         Err(error) => {
             tracing::error!(%error, "invalid configuration");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let app = build_router(config.clone());
+    let addr: SocketAddr = config.bind_addr;
+
+    let listener = match tokio::net::TcpListener::bind(addr).await {
+        Ok(listener) => listener,
+        Err(error) => {
+            tracing::error!(%error, "failed to bind address");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    tracing::info!(
+        %addr,
+        threads = config.thread_count,
+        body_limit_bytes = config.body_limit_bytes,
+        "extract service ready"
+    );
+
+    match axum::serve(listener, app).await {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            tracing::error!(%error, "server error");
             ExitCode::FAILURE
         }
     }

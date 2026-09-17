@@ -111,12 +111,12 @@ EXTRACT_NUM_THREADS=                 # opcional; si se omite, pool rayon = avail
 ### Fase 0 — Configuración e Infraestructura
 - [x] **T1** · Scaffold Cargo + toolchain + perfil release + flags AVX
 - [x] **T2** · Config de entorno + logging estructurado
-- [ ] **T3** · Esqueleto de 3 capas + `/health` + body limit 50MB + problem+json base (spike vertical)
+- [x] **T3** · Esqueleto de 3 capas + `/health` + body limit 50MB + problem+json base (spike vertical)
 
 ### ✅ Checkpoint A (T1-T3)
-- [ ] `cargo build --release` compila sin warnings
-- [ ] Server arranca, `GET /health` → 200
-- [ ] POST con body >50MB → 413 `Content-Type: application/problem+json`
+- [x] `cargo build --release` compila sin warnings
+- [x] Server arranca, `GET /health` → 200
+- [x] POST con body >50MB → 413 `Content-Type: application/problem+json`
 
 ### Fase 1 — Capa de Dominio / Infraestructura
 - [ ] **T4** · Modelos de dominio + errores del dominio
