@@ -202,13 +202,13 @@
 **Description:** `app::extract_service` que orquesta la petición de extremo a extremo: mueve el payload a un `tokio::task::spawn_blocking`, instala el pool rayon dedicado (`ThreadPoolBuilder` con N hilos auto-detectados vía `available_parallelism()`, creado una vez en `AppState`), encadena decode → validar → parsear → extraer, y traduce `DomainError` al tipo de error de la capa API. Emite un span de tracing con duración, tamaño y page_count.
 
 **Acceptance criteria:**
-- [ ] El metodo es `async` y delega todo el cómputo a `spawn_blocking` (sin bloquear el runtime async)
-- [ ] Usa el pool rayon compartido de `AppState` (no pool global)
-- [ ] Emite tracing span con `duration_ms`, `bytes`, `page_count`
+- [x] El metodo es `async` y delega todo el cómputo a `spawn_blocking` (sin bloquear el runtime async)
+- [x] Usa el pool rayon compartido de `AppState` (no pool global)
+- [x] Emite tracing span con `duration_ms`, `bytes`, `page_count`
 
 **Verification:**
-- [ ] Tests pass: test que invoca el servicio contra un fixture y valida `ExtractedDocument`
-- [ ] Manual check: log muestra el span con métricas; el endpoint responde mientras hay carga
+- [x] Tests pass: test que invoca el servicio contra un fixture y valida `ExtractedDocument` → 5/5 (RED→GREEN)
+- [x] Manual check: log muestra el span con métricas (`bytes=1132 page_count=2 duration_ms=2`); el endpoint responde mientras hay carga (vía `spawn_blocking`, T10)
 
 **Dependencies:** T2, T7
 
@@ -216,15 +216,16 @@
 - `src/app/extract_service.rs`
 - `src/app/state.rs`
 - `src/app/mod.rs`
+- `src/main.rs` (span CLOSE visible en log)
 
 **Estimated scope:** Medium (3 archivos)
 
 ---
 
 ## ✅ Checkpoint C (T8)
-- [ ] El flujo completo (invocado por test/CLI) produce `ExtractedDocument` correcto
-- [ ] El runtime async no se bloquea (peticiones concurrentes siguen respondiendo)
-- [ ] Span de tracing con métricas visibles en log
+- [x] El flujo completo (invocado por test/CLI) produce `ExtractedDocument` correcto
+- [x] El runtime async no se bloquea (peticiones concurrentes siguen respondiendo)
+- [x] Span de tracing con métricas visible en log
 
 ---
 
