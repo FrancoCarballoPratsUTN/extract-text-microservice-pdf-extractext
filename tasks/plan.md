@@ -120,7 +120,7 @@ EXTRACT_NUM_THREADS=                 # opcional; si se omite, pool rayon = avail
 
 ### Fase 1 — Capa de Dominio / Infraestructura
 - [x] **T4** · Modelos de dominio + errores del dominio
-- [ ] **T5** · Decodificador Base64 SIMD con buffer exacto
+- [x] **T5** · Decodificador Base64 SIMD con buffer exacto
 - [ ] **T6** · Parseo `lopdf` en memoria + validación `%PDF-`
 - [ ] **T7** · Motor de extracción paralela por páginas (rayon, N hilos auto-detectados)
 

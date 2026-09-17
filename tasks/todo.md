@@ -119,13 +119,13 @@
 **Description:** `domain::base64_decoder` que decodifica el payload con `base64_simd`. Pre-cálcula el tamaño exacto del buffer con `needed_bufsize` y asigna el `Vec<u8>` con esa capacidad antes de decodificar (cero reasignaciones). Devuelve `PdfBytes` o `DomainError::Base64Decode`.
 
 **Acceptance criteria:**
-- [ ] Decodifica un Base64 válido (con padding) y devuelve exactamente los bytes originales
-- [ ] Base64 inválido → `DomainError::Base64Decode` (sin panic)
-- [ ] El buffer se pre-asigna con el tamaño calculado (`Vec::with_capacity`/`needed_bufsize`), verificable en benchmark/test de tamaño de capacidad
+- [x] Decodifica un Base64 válido (con padding) y devuelve exactamente los bytes originales
+- [x] Base64 inválido → `DomainError::Base64Decode` (sin panic)
+- [x] El buffer se pre-asigna con el tamaño calculado (`Vec::with_capacity`/`needed_bufsize`), verificable en benchmark/test de tamaño de capacidad
 
 **Verification:**
-- [ ] Tests pass: unit tests con vectores conocidos (`b"Hello, World!"` → base64), caso inválido, caso con padding
-- [ ] Build: `cargo clippy -- -D warnings`
+- [x] Tests pass: unit tests con vectores conocidos (`b"Hello, World!"` → base64), caso inválido, caso con padding
+- [x] Build: `cargo clippy -- -D warnings`
 
 **Dependencies:** T4
 
