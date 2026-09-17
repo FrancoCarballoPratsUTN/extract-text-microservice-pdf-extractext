@@ -142,13 +142,13 @@
 **Description:** `domain::pdf_parser` que valida estructuralmente la firma mágica `%PDF-` en los primeros bytes y carga el documento con `lopdf::Document::load_mem(&bytes)` directamente desde el slice en RAM (sin tocar disco). Devuelve el `Document` o `DomainError::InvalidPdfSignature` / `DomainError::PdfParse`.
 
 **Acceptance criteria:**
-- [ ] Sin firma `%PDF-` → `InvalidPdfSignature` (respuesta HTTP 400 en capa API)
-- [ ] PDF válido → `Document` parseado; `page_count == n` correcto
-- [ ] PDF corrupto → `PdfParse` (sin panic)
+- [x] Sin firma `%PDF-` → `InvalidPdfSignature` (respuesta HTTP 400 en capa API)
+- [x] PDF válido → `Document` parseado; `page_count == n` correcto
+- [x] PDF corrupto → `PdfParse` (sin panic)
 
 **Verification:**
-- [ ] Tests pass: fixture PDF generado válido + bytes sin firma + bytes corruptos
-- [ ] Manual check: `load_mem` nunca escribe a disco (verificación por inspección)
+- [x] Tests pass: fixture PDF generado válido + bytes sin firma + bytes corruptos
+- [x] Manual check: `load_mem` nunca escribe a disco (solo `load_mem`; fixture generado en RAM)
 
 **Dependencies:** T4
 
