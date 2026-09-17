@@ -167,14 +167,14 @@
 **Description:** `domain::page_extractor` que itera las páginas del `Document` en paralelo con `rayon` (`(0..page_count).into_par_iter()`), extrae texto con `lopdf::Document::extract_text` por página dentro del pool dedicado, recolecta `PageText` y agrega el texto total con `String::with_capacity(estimación)` para evitar reasignaciones. Una página que falle devuelve texto vacío (aislamiento de errores).
 
 **Acceptance criteria:**
-- [ ] Extrae texto de un PDF multipágina en paralelo; orden de páginas preservado
-- [ ] Texto total agregado en un único `String` pre-dimensionado (medible: sin duplicar páginas enteras en memoria)
-- [ ] Una página problemática no aborta la extracción de las demás
+- [x] Extrae texto de un PDF multipágina en paralelo; orden de páginas preservado
+- [x] Texto total agregado en un único `String` pre-dimensionado (medible: sin duplicar páginas enteras en memoria) → usando `ExtractedDocument::text()` derivado con pre-sizing
+- [x] Una página problemática no aborta la extracción de las demás
 
 **Verification:**
-- [ ] Tests pass: fixture de 2+ páginas → nº de páginas, contenido esperado, orden
-- [ ] Bench/micro-check: uso de N hilos (N = núcleos del dispositivo) confirmado en log/bench (ver T12)
-- [ ] Manual check: revisión de ausencia de `.clone()` en la ruta de agregación
+- [x] Tests pass: fixture de 2+ páginas → nº de páginas, contenido esperado, orden
+- [x] Bench/micro-check: uso de N hilos (N = núcleos del dispositivo) confirmado en log/bench (ver T12)
+- [x] Manual check: revisión de ausencia de `.clone()` en la ruta de agregación
 
 **Dependencies:** T5, T6
 

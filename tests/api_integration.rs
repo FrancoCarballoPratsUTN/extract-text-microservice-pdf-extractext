@@ -10,6 +10,7 @@ fn config_with_limit(limit_bytes: usize) -> Config {
         bind_addr: "127.0.0.1:0".parse().unwrap(),
         body_limit_bytes: limit_bytes,
         thread_count: 2,
+        max_decompressed_bytes: 64 * 1024 * 1024,
     }
 }
 

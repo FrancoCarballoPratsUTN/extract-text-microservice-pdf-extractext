@@ -3,12 +3,14 @@ use std::net::SocketAddr;
 
 pub const DEFAULT_BIND_ADDR: &str = "0.0.0.0:8080";
 pub const DEFAULT_BODY_LIMIT_BYTES: usize = 50 * 1024 * 1024;
+pub const DEFAULT_MAX_DECOMPRESSED_BYTES: usize = 64 * 1024 * 1024;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ConfigError {
     BindAddr(String),
     BodyLimit(String),
     ThreadCount(String),
+    DecompressLimit(String),
 }
 
 impl fmt::Display for ConfigError {
@@ -17,6 +19,9 @@ impl fmt::Display for ConfigError {
             Self::BindAddr(raw) => write!(f, "invalid EXTRACT_BIND_ADDR: {raw:?}"),
             Self::BodyLimit(raw) => write!(f, "invalid EXTRACT_BODY_LIMIT_BYTES: {raw:?}"),
             Self::ThreadCount(raw) => write!(f, "invalid EXTRACT_NUM_THREADS: {raw:?}"),
+            Self::DecompressLimit(raw) => {
+                write!(f, "invalid EXTRACT_MAX_DECOMPRESSED_BYTES: {raw:?}")
+            }
         }
     }
 }
@@ -28,6 +33,7 @@ pub struct Config {
     pub bind_addr: SocketAddr,
     pub body_limit_bytes: usize,
     pub thread_count: usize,
+    pub max_decompressed_bytes: usize,
 }
 
 impl Config {
@@ -55,10 +61,16 @@ impl Config {
             None => default_thread_count(),
         };
 
+        let max_decompressed_bytes = match get_env("EXTRACT_MAX_DECOMPRESSED_BYTES") {
+            Some(raw) => parse_positive(&raw, ConfigError::DecompressLimit)?,
+            None => DEFAULT_MAX_DECOMPRESSED_BYTES,
+        };
+
         Ok(Self {
             bind_addr,
             body_limit_bytes,
             thread_count,
+            max_decompressed_bytes,
         })
     }
 }
@@ -81,7 +93,10 @@ fn default_thread_count() -> usize {
 mod tests {
     use std::collections::HashMap;
 
-    use super::{Config, ConfigError, DEFAULT_BIND_ADDR, DEFAULT_BODY_LIMIT_BYTES};
+    use super::{
+        Config, ConfigError, DEFAULT_BIND_ADDR, DEFAULT_BODY_LIMIT_BYTES,
+        DEFAULT_MAX_DECOMPRESSED_BYTES,
+    };
 
     fn env(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<String> {
         let map: HashMap<&str, &str> = pairs.iter().copied().collect();
@@ -102,6 +117,7 @@ mod tests {
                 bind_addr: "127.0.0.1:9090".parse().unwrap(),
                 body_limit_bytes: 4096,
                 thread_count: 4,
+                max_decompressed_bytes: DEFAULT_MAX_DECOMPRESSED_BYTES,
             })
         );
     }
@@ -116,6 +132,7 @@ mod tests {
                 bind_addr: DEFAULT_BIND_ADDR.parse().unwrap(),
                 body_limit_bytes: DEFAULT_BODY_LIMIT_BYTES,
                 thread_count: super::default_thread_count(),
+                max_decompressed_bytes: DEFAULT_MAX_DECOMPRESSED_BYTES,
             })
         );
     }
@@ -133,6 +150,7 @@ mod tests {
                 bind_addr: "0.0.0.0:3000".parse().unwrap(),
                 body_limit_bytes: 1048576,
                 thread_count: super::default_thread_count(),
+                max_decompressed_bytes: DEFAULT_MAX_DECOMPRESSED_BYTES,
             })
         );
     }
@@ -173,5 +191,37 @@ mod tests {
             config,
             Err(ConfigError::BindAddr("not-an-address".to_string()))
         );
+    }
+
+    #[test]
+    fn applies_explicit_max_decompressed_bytes() {
+        let config = Config::from(env(&[("EXTRACT_MAX_DECOMPRESSED_BYTES", "1048576")]));
+
+        assert_eq!(
+            config,
+            Ok(Config {
+                bind_addr: DEFAULT_BIND_ADDR.parse().unwrap(),
+                body_limit_bytes: DEFAULT_BODY_LIMIT_BYTES,
+                thread_count: super::default_thread_count(),
+                max_decompressed_bytes: 1048576,
+            })
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_max_decompressed_bytes() {
+        let config = Config::from(env(&[("EXTRACT_MAX_DECOMPRESSED_BYTES", "huge")]));
+
+        assert_eq!(
+            config,
+            Err(ConfigError::DecompressLimit("huge".to_string()))
+        );
+    }
+
+    #[test]
+    fn rejects_zero_max_decompressed_bytes() {
+        let config = Config::from(env(&[("EXTRACT_MAX_DECOMPRESSED_BYTES", "0")]));
+
+        assert_eq!(config, Err(ConfigError::DecompressLimit("0".to_string())));
     }
 }

@@ -122,7 +122,7 @@ EXTRACT_NUM_THREADS=                 # opcional; si se omite, pool rayon = avail
 - [x] **T4** · Modelos de dominio + errores del dominio
 - [x] **T5** · Decodificador Base64 SIMD con buffer exacto
 - [x] **T6** · Parseo `lopdf` en memoria + validación `%PDF-`
-- [ ] **T7** · Motor de extracción paralela por páginas (rayon, N hilos auto-detectados)
+- [x] **T7** · Motor de extracción paralela por páginas (rayon, N hilos auto-detectados)
 
 ### ✅ Checkpoint B (T4-T7)
 - [ ] Tests unitarios del dominio pasan
