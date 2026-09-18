@@ -1,22 +1,17 @@
-#[cfg(test)]
 use crate::domain::PdfBytes;
 
-#[cfg(test)]
 pub fn valid_pdf_bytes(page_count: usize) -> Vec<u8> {
     _valid_pdf_bytes(page_count)
 }
 
-#[cfg(test)]
 pub fn pdf_with_unreadable_page(page_count: usize, broken_page: usize) -> Vec<u8> {
     _pdf_with_unreadable_page(page_count, broken_page)
 }
 
-#[cfg(test)]
 pub fn valid_pdf(page_count: usize) -> PdfBytes {
     PdfBytes::new(_valid_pdf_bytes(page_count))
 }
 
-#[cfg(test)]
 pub fn broken_pdf(page_count: usize, broken_page: usize) -> PdfBytes {
     PdfBytes::new(_pdf_with_unreadable_page(page_count, broken_page))
 }

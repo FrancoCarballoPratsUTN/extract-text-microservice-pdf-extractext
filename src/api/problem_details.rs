@@ -64,6 +64,13 @@ impl ProblemDetails {
         Self::not_found_with_instance("/")
     }
 
+    pub fn invalid_request_body() -> Self {
+        Self::bad_request(
+            "Invalid Request Body",
+            "request body must be a JSON object with a document_base64 string field",
+        )
+    }
+
     pub fn not_found_with_instance(instance: &str) -> Self {
         Self {
             r#type: "about:blank",

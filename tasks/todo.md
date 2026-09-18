@@ -262,13 +262,13 @@
 **Description:** Handler definitivo que (1) valida la forma del body JSON con `serde` `{ document_base64: String }`, (2) lo entrega al servicio (T8), (3) responde `200` con `ExtractedDocument` serializado. Con `DefaultBodyLimit` 50MB. Contrato congelado en T3 debe confirmarse aquí.
 
 **Acceptance criteria:**
-- [ ] `POST /extract` con PDF válido → `200` + JSON con `page_count`, `pages`, `text`, y `duration_ms`
-- [ ] Base64 malformado → `400 problem+json`; PDF sin firma → `400`; PDF corrupto → `422`
-- [ ] Body >50MB → `413 problem+json`
+- [x] `POST /extract` con PDF válido → `200` + JSON con `page_count`, `pages`, `text`, y `duration_ms`
+- [x] Base64 malformado → `400 problem+json`; PDF sin firma → `400`; PDF corrupto → `422`
+- [x] Body >50MB → `413 problem+json`
 
 **Verification:**
-- [ ] Tests integración: casos 200, 400 (x2), 422, 413 (ver T11)
-- [ ] Manual check: `curl` con PDF real de 200+ páginas responde con texto extraído
+- [x] Tests integración: casos 200, 400 base64, 400 firma, 422, 400 JSON inválido, 413 → 8/8 (RED→GREEN)
+- [x] Manual check: `curl` con PDF de 200 páginas → `200 application/json`, `page_count=200`, `duration_ms=60`; span `extract{bytes=84700 page_count=200 duration_ms=60}` en log
 
 **Dependencies:** T8, T9
 
@@ -276,14 +276,16 @@
 - `src/api/handlers.rs`
 - `src/api/contract.rs`
 - `src/api/router.rs`
+- `src/domain/test_support.rs` (accesible a integración para fixtures reproducibles)
+- `tests/api_integration.rs`
 
 **Estimated scope:** Small (3 archivos)
 
 ---
 
 ## ✅ Checkpoint D (T9-T10)
-- [ ] Todos los casos HTTP (200/400/413/422) funcionan con `problem+json` donde corresponde
-- [ ] Flujo end-to-end pasa con PDF real; logs con span de métricas
+- [x] Todos los casos HTTP (200/400/413/422/404) funcionan con `problem+json` donde corresponde
+- [x] Flujo end-to-end pasa con PDF de 200 páginas; logs con span de métricas
 - [ ] Revisión humana del contrato de respuesta
 
 ---

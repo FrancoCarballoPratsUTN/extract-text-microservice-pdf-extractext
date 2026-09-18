@@ -3,6 +3,7 @@ pub mod model;
 pub mod page_extractor;
 pub mod pdf_parser;
 pub mod pdf_utils;
+#[doc(hidden)]
 pub mod test_support;
 
 pub use base64_decoder::decode_base64;
