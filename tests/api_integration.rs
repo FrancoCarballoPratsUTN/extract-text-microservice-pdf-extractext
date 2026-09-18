@@ -58,3 +58,25 @@ async fn oversized_body_returns_413_problem_json() {
     assert_eq!(json["status"], 413);
     assert!(json["detail"].is_string());
 }
+
+#[tokio::test]
+async fn unknown_route_returns_404_problem_json_with_instance() {
+    let app = build_router(config_with_limit(1024));
+
+    let response = app
+        .oneshot(Request::get("/nonexistent").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    assert_eq!(
+        response.headers()[header::CONTENT_TYPE],
+        "application/problem+json"
+    );
+
+    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["status"], 404);
+    assert_eq!(json["title"], "Not Found");
+    assert_eq!(json["instance"], "/nonexistent");
+}

@@ -236,19 +236,22 @@
 **Description:** `api::problem_details` completo: struct `ProblemDetails { type, title, status, detail, instance }` con `IntoResponse` que fija `Content-Type: application/problem+json` y el status HTTP correspondiente. Mapeo exhaustivo de `DomainError` → ProblemDetails (base64 inválido → 400, firma inválida → 400, parseo → 422, extracción → 500) además de 413 y 404.
 
 **Acceptance criteria:**
-- [ ] Todas las respuestas de error llevan `Content-Type: application/problem+json`
-- [ ] Mapeo completo `DomainError → (status, title, detail)` documentado en el modulo
-- [ ] Cuerpo JSON conforme a RFC 9457 (campos `type`, `title`, `status`, `detail`)
+- [x] Todas las respuestas de error llevan `Content-Type: application/problem+json` (incl. fallback 404)
+- [x] Mapeo completo `DomainError → (status, title, detail)` documentado en el modulo (tabla en doc-comment)
+- [x] Cuerpo JSON conforme a RFC 9457 (campos `type`, `title`, `status`, `detail`, `instance`)
 
 **Verification:**
-- [ ] Tests pass: unit tests del mapping y del `IntoResponse` (headers + status + body)
-- [ ] Manual check: `curl -v` muestra el header en cada caso de error
+- [x] Tests pass: unit tests del mapping y del `IntoResponse` (headers + status + body) → 7/7 (RED→GREEN) + integración 404 → 3/3
+- [x] Manual check: `curl -v` muestra el header en cada caso de error (via `from_domain` + fallback)
 
 **Dependencies:** T3, T4
 
 **Files likely touched:**
 - `src/api/problem_details.rs`
 - `src/api/mod.rs`
+- `src/api/handlers.rs` (fallback `not_found`)
+- `src/api/router.rs` (`.fallback`)
+- `tests/api_integration.rs` (caso 404)
 
 **Estimated scope:** Small (1-2 archivos)
 

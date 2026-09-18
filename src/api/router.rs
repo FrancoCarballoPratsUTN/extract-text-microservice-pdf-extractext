@@ -17,6 +17,7 @@ pub fn build_router(config: Config) -> Router {
     Router::new()
         .route("/health", get(handlers::health))
         .route("/extract", post(handlers::extract))
+        .fallback(handlers::not_found)
         .layer(DefaultBodyLimit::max(config.body_limit_bytes))
         .layer(middleware::from_fn_with_state(
             state.clone(),
