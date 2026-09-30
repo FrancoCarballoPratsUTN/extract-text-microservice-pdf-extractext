@@ -1,15 +1,10 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::domain::{ExtractedDocument, PageText};
 
 #[derive(Debug, Serialize)]
 pub struct HealthStatus {
     pub status: &'static str,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ExtractRequest {
-    pub document_base64: String,
 }
 
 #[derive(Debug, Serialize)]

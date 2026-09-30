@@ -4,12 +4,12 @@
 //!
 //! | Error                    | status | title                  | detail                                                        |
 //! |--------------------------|--------|------------------------|---------------------------------------------------------------|
-//! | `Base64Decode`           | 400    | Invalid Base64         | the request body is not valid base64                          |
 //! | `InvalidPdfSignature`    | 400    | Invalid PDF Signature  | the decoded payload does not start with the `%PDF-` magic signature |
 //! | `PdfParse`               | 422    | Unprocessable PDF      | the payload is not a well-formed PDF document                 |
 //! | `Extraction`             | 500    | Extraction Failed      | the PDF text could not be extracted                           |
 //!
-//! Además: body mayor al límite → `413 Payload Too Large`; ruta inexistente → `404 Not Found`.
+//! Además: body mayor al límite → `413 Payload Too Large`; ruta inexistente → `404 Not Found`;
+//! `Content-Type` que no sea PDF/binario en `/extract` → `415 Unsupported Media Type`.
 
 use axum::{
     Json,
@@ -33,9 +33,6 @@ pub struct ProblemDetails {
 impl ProblemDetails {
     pub fn from_domain(error: DomainError) -> Self {
         match error {
-            DomainError::Base64Decode => {
-                Self::bad_request("Invalid Base64", "the request body is not valid base64")
-            }
             DomainError::InvalidPdfSignature => Self::bad_request(
                 "Invalid PDF Signature",
                 "the decoded payload does not start with the %PDF- magic signature",
@@ -64,11 +61,15 @@ impl ProblemDetails {
         Self::not_found_with_instance("/")
     }
 
-    pub fn invalid_request_body() -> Self {
-        Self::bad_request(
-            "Invalid Request Body",
-            "request body must be a JSON object with a document_base64 string field",
-        )
+    pub fn unsupported_media_type() -> Self {
+        Self {
+            r#type: "about:blank",
+            title: "Unsupported Media Type",
+            status: StatusCode::UNSUPPORTED_MEDIA_TYPE.as_u16(),
+            detail: "request Content-Type must be application/pdf or application/octet-stream"
+                .to_string(),
+            instance: "/extract".to_string(),
+        }
     }
 
     pub fn not_found_with_instance(instance: &str) -> Self {
@@ -89,7 +90,7 @@ impl ProblemDetails {
         Self::with_status(StatusCode::UNPROCESSABLE_ENTITY, title, detail)
     }
 
-    fn internal(title: &'static str, detail: &str) -> Self {
+    pub(crate) fn internal(title: &'static str, detail: &str) -> Self {
         Self::with_status(StatusCode::INTERNAL_SERVER_ERROR, title, detail)
     }
 
@@ -137,20 +138,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn base64_decode_error_maps_to_400_bad_request() {
-        let problem = ProblemDetails::from_domain(DomainError::Base64Decode);
-        let response = problem.clone().into_response();
-        let json = body_json(response).await;
-
-        assert_eq!(problem.status, 400);
-        assert_eq!(json["status"], 400);
-        assert_eq!(json["type"], "about:blank");
-        assert!(json["title"].is_string());
-        assert!(json["detail"].is_string());
-        assert!(json["instance"].is_string());
-    }
-
-    #[tokio::test]
     async fn invalid_signature_error_maps_to_400_bad_request() {
         let problem = ProblemDetails::from_domain(DomainError::InvalidPdfSignature);
         let response = problem.clone().into_response();
@@ -184,10 +171,6 @@ mod tests {
     async fn every_response_uses_problem_json_content_type_and_matching_status() {
         let cases = [
             (
-                ProblemDetails::from_domain(DomainError::Base64Decode),
-                StatusCode::BAD_REQUEST,
-            ),
-            (
                 ProblemDetails::from_domain(DomainError::InvalidPdfSignature),
                 StatusCode::BAD_REQUEST,
             ),
@@ -203,6 +186,10 @@ mod tests {
                 ProblemDetails::payload_too_large(1024),
                 StatusCode::PAYLOAD_TOO_LARGE,
             ),
+            (
+                ProblemDetails::unsupported_media_type(),
+                StatusCode::UNSUPPORTED_MEDIA_TYPE,
+            ),
             (ProblemDetails::not_found(), StatusCode::NOT_FOUND),
         ];
 
@@ -216,7 +203,7 @@ mod tests {
 
     #[tokio::test]
     async fn payload_too_large_reports_the_configured_limit() {
-        let problem = ProblemDetails::payload_too_large(52428800);
+        let problem = ProblemDetails::payload_too_large(15 * 1024 * 1024);
         let response = problem.clone().into_response();
         let json = body_json(response).await;
 
@@ -224,7 +211,7 @@ mod tests {
         assert_eq!(json["status"], 413);
         assert_eq!(json["title"], "Payload Too Large");
         assert!(json["detail"].is_string());
-        assert!(json["detail"].to_string().contains("52428800"));
+        assert!(json["detail"].to_string().contains("15728640"));
     }
 
     #[tokio::test]
@@ -236,5 +223,22 @@ mod tests {
         assert_eq!(problem.status, 404);
         assert_eq!(json["status"], 404);
         assert_eq!(json["title"], "Not Found");
+    }
+
+    #[tokio::test]
+    async fn unsupported_media_type_has_415_status_listing_allowed_types() {
+        let problem = ProblemDetails::unsupported_media_type();
+        let response = problem.clone().into_response();
+        let json = body_json(response).await;
+
+        assert_eq!(problem.status, 415);
+        assert_eq!(json["status"], 415);
+        assert_eq!(json["title"], "Unsupported Media Type");
+        assert!(json["detail"].to_string().contains("application/pdf"));
+        assert!(
+            json["detail"]
+                .to_string()
+                .contains("application/octet-stream")
+        );
     }
 }

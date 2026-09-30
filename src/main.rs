@@ -1,9 +1,13 @@
 use std::{env, net::SocketAddr, process::ExitCode};
 
 use extract::{api::router::build_router, config::Config};
+use mimalloc::MiMalloc;
 use tracing_subscriber::EnvFilter;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -37,6 +41,8 @@ async fn main() -> ExitCode {
         %addr,
         threads = config.thread_count,
         body_limit_bytes = config.body_limit_bytes,
+        max_decompressed_bytes = config.max_decompressed_bytes,
+        extractor = ?config.extractor,
         "extract service ready"
     );
 

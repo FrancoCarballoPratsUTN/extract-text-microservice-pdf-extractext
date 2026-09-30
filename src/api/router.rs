@@ -4,6 +4,7 @@ use axum::{
     middleware,
     routing::{get, post},
 };
+use tower_http::compression::{CompressionLayer, CompressionLevel};
 
 use crate::{
     api::{handlers, middleware as api_middleware},
@@ -19,6 +20,7 @@ pub fn build_router(config: Config) -> Router {
         .route("/extract", post(handlers::extract))
         .fallback(handlers::not_found)
         .layer(DefaultBodyLimit::max(config.body_limit_bytes))
+        .layer(CompressionLayer::new().quality(CompressionLevel::Fastest))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             api_middleware::enforce_payload_limit,

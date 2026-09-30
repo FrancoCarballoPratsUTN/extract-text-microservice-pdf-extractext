@@ -15,7 +15,6 @@ impl PdfBytes {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DomainError {
-    Base64Decode,
     InvalidPdfSignature,
     PdfParse,
     Extraction,
@@ -97,8 +96,11 @@ mod tests {
 
     #[test]
     fn domain_error_variants_are_equatable_and_distinct() {
-        assert_eq!(DomainError::Base64Decode, DomainError::Base64Decode);
-        assert_ne!(DomainError::Base64Decode, DomainError::InvalidPdfSignature);
+        assert_eq!(
+            DomainError::InvalidPdfSignature,
+            DomainError::InvalidPdfSignature
+        );
+        assert_ne!(DomainError::InvalidPdfSignature, DomainError::PdfParse);
         assert_ne!(DomainError::PdfParse, DomainError::Extraction);
     }
 }

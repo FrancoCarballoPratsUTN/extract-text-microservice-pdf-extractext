@@ -1,0 +1,26 @@
+name: extract-text-microservice
+
+
+
+services:
+  extract-service:
+    image: extract-rust:0.1.0
+    container_name: extract-service
+    environment:
+      EXTRACT_BIND_ADDR: 0.0.0.0:8000
+      EXTRACT_BODY_LIMIT_BYTES: ${EXTRACT_BODY_LIMIT_BYTES:-15728640}
+      EXTRACT_EXTRACTOR: ${EXTRACT_EXTRACTOR:-lean}
+      RUST_LOG: ${RUST_LOG:-info}
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.extract-service.rule=Host(`extract-service.universidad.localhost`) && PathPrefix(`/extract`)"
+      - "traefik.http.routers.extract-service.tls=true"
+      - "traefik.http.services.extract-service.loadbalancer.server.port=8000"
+    networks:
+      - mired
+
+networks:
+  mired:
+    external: true

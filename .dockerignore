@@ -1,0 +1,8 @@
+target
+.git
+tests
+tasks
+k6
+Dockerfile
+docker-compose.yml
+README.md
